@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_rx/src/rx_workers/utils/debouncer.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
@@ -46,6 +47,7 @@ class _AiPageState extends State<AiPage> {
     setState(() {});
   }
 
+  // final debounce = Debounce(Duration(milliseconds: 500));
   /// This is the callback that the SpeechToText plugin calls when
   /// the platform returns recognized words.
   void _onSpeechResult(SpeechRecognitionResult result) {
@@ -53,14 +55,22 @@ class _AiPageState extends State<AiPage> {
     setState(() {
       String lastWords = result.recognizedWords.substring(_lastWordsIndex);
 
-      // 读取文本
-      int index = lastWords.indexOf('小特小特');
-      if (index > -1) {
-        _lastWordsIndex += index + 4; // 下标后移
-        _showWords = '请问有什么可以帮助你';
-      }
+      // // 读取文本
+      // int index = lastWords.indexOf('小特小特');
+      // if (index > -1) {
+      //   _lastWordsIndex += index + 4; // 下标后移
+      //   _showWords = '请问有什么可以帮助你';
+      // }
+
+      debounce(() {
+        print('--------------------------------');
+        print(lastWords);
+        _lastWordsIndex = result.recognizedWords.length;
+      });
     });
   }
+
+  final debounce = Debouncer(delay: Duration(milliseconds: 2000));
 
   @override
   Widget build(BuildContext context) {
