@@ -13,7 +13,8 @@ class _AiPageState extends State<AiPage> {
   final SpeechToText _speechToText = SpeechToText();
   bool _speechEnabled = false;
   String _lastWords = '';
-  String _lastAnswer = '';
+  int _lastWordsIndex = 0;
+  String _showWords = '请说“小特小特”，唤醒语音助手';
 
   @override
   void initState() {
@@ -48,49 +49,50 @@ class _AiPageState extends State<AiPage> {
   /// This is the callback that the SpeechToText plugin calls when
   /// the platform returns recognized words.
   void _onSpeechResult(SpeechRecognitionResult result) {
+    print(result.recognizedWords);
     setState(() {
-      _lastWords = result.recognizedWords;
-      _lastAnswer = '请问有什么可以帮助你';
+      String lastWords = result.recognizedWords.substring(_lastWordsIndex);
+
+      // 读取文本
+      int index = lastWords.indexOf('小特小特');
+      if (index > -1) {
+        _lastWordsIndex += index + 4; // 下标后移
+        _showWords = '请问有什么可以帮助你';
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text('AI 测试页面'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              '语音识别内容',
-            ),
-            Text(
-              _speechToText.isListening
-                  ? _lastWords
-                  : _speechEnabled
-                      ? '轻触麦克风开始监听...'
-                      : '语音不可用',
-            ),
-            Text(
-              '模拟回答',
-            ),
-            Text(
-              _lastAnswer,
-            ),
-          ],
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: Text('小特语音唤醒'),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed:
-            // If not yet listening for speech start, otherwise stop
-            _speechToText.isNotListening ? _startListening : _stopListening,
-        tooltip: 'Listen',
-        child: Icon(_speechToText.isNotListening ? Icons.mic_off : Icons.mic),
-      ),
-    );
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              _speechToText.isListening
+                  ? Text(
+                      _showWords,
+                      style: TextStyle(fontSize: 18),
+                    )
+                  : Text(
+                      _speechEnabled ? '轻触麦克风开始监听...' : '语音不可用',
+                      style: TextStyle(fontSize: 18),
+                    ),
+            ],
+          ),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed:
+              _speechToText.isNotListening ? _startListening : _stopListening,
+          tooltip: 'Listen',
+          shape: CircleBorder(),
+          child: Icon(_speechToText.isNotListening ? Icons.mic_off : Icons.mic),
+          // mini: true
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat);
   }
 }
