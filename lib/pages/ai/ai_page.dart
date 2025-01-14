@@ -10,7 +10,7 @@ class AiPage extends StatefulWidget {
 }
 
 class _AiPageState extends State<AiPage> {
-  SpeechToText _speechToText = SpeechToText();
+  final SpeechToText _speechToText = SpeechToText();
   bool _speechEnabled = false;
   String _lastWords = '';
   String _lastAnswer = '';
@@ -29,7 +29,10 @@ class _AiPageState extends State<AiPage> {
 
   /// Each time to start a speech recognition session
   void _startListening() async {
-    await _speechToText.listen(onResult: _onSpeechResult);
+    await _speechToText.listen(
+      onResult: _onSpeechResult,
+      localeId: 'zh-CN',
+    );
     setState(() {});
   }
 
