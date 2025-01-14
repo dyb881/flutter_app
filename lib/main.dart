@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:flutter_app/stores/stores.dart';
 import 'package:flutter_app/pages/home/home_page.dart';
 import 'package:flutter_app/pages/user/user_page.dart';
+import 'package:flutter_app/pages/ai/ai_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,14 +18,15 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
         title: 'Flutter APP',
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
           useMaterial3: true,
         ),
         initialBinding: StoresBinding(),
-        initialRoute: '/',
+        initialRoute: '/ai',
         routes: {
           '/': (context) => HomePage(),
           '/user': (context) => UserPage(),
+          '/ai': (context) => AiPage(),
         });
   }
 }
