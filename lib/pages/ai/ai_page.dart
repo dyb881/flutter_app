@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:get/get_rx/src/rx_workers/utils/debouncer.dart';
-import 'package:speech_to_text/speech_recognition_result.dart';
-import 'package:speech_to_text/speech_to_text.dart';
+import 'package:flutter_app/stores/chat.dart';
+import 'package:flutter_app/stores/chat_stt.dart';
+import 'package:get/get.dart';
 
 class AiPage extends StatefulWidget {
   const AiPage({super.key});
@@ -11,98 +11,71 @@ class AiPage extends StatefulWidget {
 }
 
 class _AiPageState extends State<AiPage> {
-  final SpeechToText _speechToText = SpeechToText();
-  bool _speechEnabled = false;
-  String _lastWords = '';
-  int _lastWordsIndex = 0;
-  String _showWords = '请说“小特小特”，唤醒语音助手';
-
-  @override
-  void initState() {
-    super.initState();
-    _initSpeech();
-  }
-
-  /// This has to happen only once per app
-  void _initSpeech() async {
-    _speechEnabled = await _speechToText.initialize();
-    setState(() {});
-  }
-
-  /// Each time to start a speech recognition session
-  void _startListening() async {
-    await _speechToText.listen(
-      onResult: _onSpeechResult,
-      localeId: 'zh-CN',
-    );
-    setState(() {});
-  }
-
-  /// Manually stop the active speech recognition session
-  /// Note that there are also timeouts that each platform enforces
-  /// and the SpeechToText plugin supports setting timeouts on the
-  /// listen method.
-  void _stopListening() async {
-    await _speechToText.stop();
-    setState(() {});
-  }
-
-  // final debounce = Debounce(Duration(milliseconds: 500));
-  /// This is the callback that the SpeechToText plugin calls when
-  /// the platform returns recognized words.
-  void _onSpeechResult(SpeechRecognitionResult result) {
-    print(result.recognizedWords);
-    setState(() {
-      String lastWords = result.recognizedWords.substring(_lastWordsIndex);
-
-      // // 读取文本
-      // int index = lastWords.indexOf('小特小特');
-      // if (index > -1) {
-      //   _lastWordsIndex += index + 4; // 下标后移
-      //   _showWords = '请问有什么可以帮助你';
-      // }
-
-      debounce(() {
-        print('--------------------------------');
-        print(lastWords);
-        _lastWordsIndex = result.recognizedWords.length;
-      });
-    });
-  }
-
-  final debounce = Debouncer(delay: Duration(milliseconds: 2000));
-
   @override
   Widget build(BuildContext context) {
+    final Chat c = Get.find();
+    final ChatStt cs = Get.find();
+
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Text('小特语音唤醒'),
+          title: Text('小特语音助手'),
         ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              _speechToText.isListening
-                  ? Text(
-                      _showWords,
-                      style: TextStyle(fontSize: 18),
-                    )
-                  : Text(
-                      _speechEnabled ? '轻触麦克风开始监听...' : '语音不可用',
-                      style: TextStyle(fontSize: 18),
-                    ),
-            ],
-          ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed:
-              _speechToText.isNotListening ? _startListening : _stopListening,
-          tooltip: 'Listen',
-          shape: CircleBorder(),
-          child: Icon(_speechToText.isNotListening ? Icons.mic_off : Icons.mic),
-          // mini: true
-        ),
+        body: ConstrainedBox(
+            constraints: BoxConstraints.expand(),
+            child: Stack(
+              alignment: Alignment.topCenter,
+              children: [
+                Obx(() => ListView.builder(
+                      reverse: true,
+                      shrinkWrap: true,
+                      padding:
+                          const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 180.0),
+                      itemCount: c.list.length,
+                      itemBuilder: (BuildContext content, int index) {
+                        var item = c.list[index];
+                        return Container(
+                            margin: EdgeInsets.only(bottom: 15.0),
+                            alignment: item['type'] == 'user'
+                                ? Alignment.centerRight
+                                : Alignment.centerLeft,
+                            child: Container(
+                                decoration: BoxDecoration(
+                                    color: Color.fromARGB(255, 255, 255, 255),
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    boxShadow: [
+                                      BoxShadow(
+                                          color: Colors.black26,
+                                          offset: Offset(0, 2.0),
+                                          blurRadius: 4.0)
+                                    ]),
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 5.0, horizontal: 10.0),
+                                child: Text(
+                                  item["text"]!,
+                                  style: TextStyle(fontSize: 16),
+                                )));
+                      },
+                    )),
+                AnimatedPositioned(
+                    duration: const Duration(milliseconds: 300),
+                    bottom: c.list.isEmpty ? Get.height * 0.5 : 130,
+                    child: Obx(() => Text(
+                          cs.isListening.value
+                              ? '请说出“小特小特”，激活语音助手'
+                              : cs.speechEnabled.value
+                                  ? '轻触麦克风开始监听...'
+                                  : '语音不可用',
+                          style: TextStyle(fontSize: 18),
+                        )))
+              ],
+            )),
+        floatingActionButton: Obx(() => FloatingActionButton(
+              onPressed: cs.isListening.value ? cs.stop : cs.start,
+              tooltip: 'Listen',
+              shape: CircleBorder(),
+              child: Icon(cs.isListening.value ? Icons.mic : Icons.mic_off),
+            )),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat);
   }
 }
