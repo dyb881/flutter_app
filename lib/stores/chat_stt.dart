@@ -50,9 +50,7 @@ class ChatStt extends GetxController {
     print(result.recognizedWords);
     String lastWords = result.recognizedWords.substring(lastWordsIndex);
 
-    lastWords = lastWords.replaceAll('小偷', '小特').replaceAll('小兔', '小特');
-
-    debounce(() {
+    debounceSend(() {
       lastWordsIndex = result.recognizedWords.length;
       talking.value = false;
 
@@ -66,17 +64,21 @@ class ChatStt extends GetxController {
         } else {
           c.answer('请说出正确的操作指令');
         }
-
-        waitInstructions.value = false;
-      } else if (lastWords.contains('小特小特')) {
-        c.send('小特小特');
-        c.answer('请问有什么可以帮助你？');
-        waitInstructions.value = true;
+      } else {
+        lastWords = lastWords.replaceAll('小偷', '小特').replaceAll('小兔', '小特');
+        if (lastWords.contains('小特小特')) {
+          c.send('小特小特');
+          c.answer('请问有什么可以帮助你？');
+          waitInstructions.value = true;
+        }
       }
 
-      print(lastWords);
+      debounceSendEnd(() {
+        waitInstructions.value = false;
+      });
     });
   }
 
-  final debounce = Debouncer(delay: Duration(milliseconds: 2000));
+  final debounceSend = Debouncer(delay: Duration(milliseconds: 1000));
+  final debounceSendEnd = Debouncer(delay: Duration(milliseconds: 10000));
 }

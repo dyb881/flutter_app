@@ -63,10 +63,10 @@ class _AiPageState extends State<AiPage> {
                     child: Text(
                       cs.isListening.value
                           ? cs.talking.value
-                              ? cs.waitInstructions.value
+                              ? '正在识别语音'
+                              : cs.waitInstructions.value
                                   ? '请说出操作指令，如“打开车门”'
-                                  : '正在识别语音'
-                              : '请说出“小特小特”，激活语音助手'
+                                  : '请说出“小特小特”，激活语音助手'
                           : '轻触麦克风开始监听',
                       style: TextStyle(fontSize: 18),
                     )))
