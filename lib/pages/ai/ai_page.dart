@@ -57,17 +57,19 @@ class _AiPageState extends State<AiPage> {
                                 )));
                       },
                     )),
-                AnimatedPositioned(
+                Obx(() => AnimatedPositioned(
                     duration: const Duration(milliseconds: 300),
                     bottom: c.list.isEmpty ? Get.height * 0.5 : 130,
-                    child: Obx(() => Text(
-                          cs.isListening.value
-                              ? '请说出“小特小特”，激活语音助手'
-                              : cs.speechEnabled.value
-                                  ? '轻触麦克风开始监听...'
-                                  : '语音不可用',
-                          style: TextStyle(fontSize: 18),
-                        )))
+                    child: Text(
+                      cs.isListening.value
+                          ? cs.talking.value
+                              ? cs.waitInstructions.value
+                                  ? '请说出操作指令，如“打开车门”'
+                                  : '正在识别语音'
+                              : '请说出“小特小特”，激活语音助手'
+                          : '轻触麦克风开始监听',
+                      style: TextStyle(fontSize: 18),
+                    )))
               ],
             )),
         floatingActionButton: Obx(() => FloatingActionButton(
