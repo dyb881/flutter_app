@@ -11,11 +11,17 @@ class AiPage extends StatefulWidget {
 }
 
 class _AiPageState extends State<AiPage> {
+  final Chat c = Get.find();
+  final ChatStt cs = Get.find();
+
+  @override
+  void initState() {
+    super.initState();
+    cs.start();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final Chat c = Get.find();
-    final ChatStt cs = Get.find();
-
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
